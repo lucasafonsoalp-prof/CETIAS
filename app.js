@@ -1,4 +1,4 @@
-const API_URL = 'https://script.google.com/macros/s/AKfycbyjj5odItP5iend4FGdg1ktp714to3UFPqVwZWYuMXGiqZDOCJR8UylJ_0KfLtrLcpqGQ/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzfHo0Kgsj9hz4n5ShURku2YUV4LkH2TvTzsNgLn8eEwy6jpRGrnY8FJEYqKYAzXP6hfw/exec';
 const SENHA_DA_ESCOLA = '12345'; // Você pode mudar essa senha aqui!
 
 document.addEventListener('DOMContentLoaded', () => {
