@@ -14,6 +14,31 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen">
 
+    <!-- Tela de Login Overlay -->
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md">
+            <div class="text-center mb-8">
+                <svg class="w-12 h-12 text-blue-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                <h2 class="text-2xl font-bold text-slate-800">Acesso Restrito</h2>
+                <p class="text-sm text-slate-500 mt-1">Identifique-se para registrar ocorrências</p>
+            </div>
+            <form id="loginForm" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Seu Nome (Professor/Coordenador)</label>
+                    <input type="text" id="loginName" required class="w-full rounded-md border-slate-300 border px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" placeholder="Ex: Prof. Carlos">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Senha da Escola</label>
+                    <input type="password" id="loginPassword" required class="w-full rounded-md border-slate-300 border px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" placeholder="••••••••">
+                </div>
+                <button type="submit" class="w-full flex justify-center items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white font-medium py-2.5 px-4 rounded-md transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-blue-600">
+                    Entrar no Sistema
+                </button>
+                <p id="loginError" class="text-red-500 text-sm text-center hidden mt-2">Senha incorreta!</p>
+            </form>
+        </div>
+    </div>
+
     <!-- Top Navigation -->
     <header class="bg-blue-800 text-white shadow" style="background-color: #0d47a1;">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -21,8 +46,11 @@
                 <svg class="w-8 h-8 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                 <h1 class="text-2xl font-bold tracking-tight">SGI <span class="font-normal text-blue-200">| Gestão Disciplinar</span></h1>
             </div>
-            <div class="text-sm font-medium text-blue-200 border border-blue-600 rounded-full py-1.5 px-4 bg-blue-900/30">
-                Portal do Coordenador / Professor
+            <div class="flex items-center gap-3">
+                <div id="loggedUserLabel" class="text-sm font-medium text-white">Não identificado</div>
+                <div class="text-sm font-medium text-blue-200 border border-blue-600 rounded-full py-1.5 px-4 bg-blue-900/30">
+                    Portal
+                </div>
             </div>
         </div>
     </header>
@@ -69,9 +97,17 @@
                             <select id="infractionType" required class="w-full rounded-md border-slate-300 border px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all bg-white text-slate-700">
                                 <option value="" disabled selected>Selecione...</option>
                                 <option value="Atraso">Atraso</option>
-                                <option value="Uso de celular">Uso de celular</option>
-                                <option value="Desrespeito às regras">Desrespeito às regras</option>
+                                <option value="Uso de celular em sala">Uso de celular em sala</option>
+                                <option value="Desrespeito às regras/professor">Desrespeito às regras/professor</option>
                                 <option value="Uniforme incompleto">Uniforme incompleto</option>
+                                <option value="Agressão verbal (Xingamentos)">Agressão verbal (Xingamentos)</option>
+                                <option value="Agressão física">Agressão física</option>
+                                <option value="Bullying / Cyberbullying">Bullying / Cyberbullying</option>
+                                <option value="Cola em avaliação">Cola em avaliação</option>
+                                <option value="Danos ao patrimônio da escola">Danos ao patrimônio da escola</option>
+                                <option value="Saída de sala sem permissão">Saída de sala sem permissão</option>
+                                <option value="Barulho / Tumulto em sala">Barulho / Tumulto em sala</option>
+                                <option value="Fumo / Substâncias proibidas">Fumo / Substâncias proibidas</option>
                                 <option value="Outros">Outros</option>
                             </select>
                         </div>
@@ -149,7 +185,8 @@
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Data / Hora</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Aluno / Turma</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Infração</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Ação Tomada</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Ação / Descrição</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Registrado por</th>
                             </tr>
                         </thead>
                         <tbody id="infractionsTableBody" class="bg-white text-sm divide-y divide-slate-100">

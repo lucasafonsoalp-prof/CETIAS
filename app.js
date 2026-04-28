@@ -1,6 +1,37 @@
-const API_URL = 'https://script.google.com/macros/s/AKfycbzfHo0Kgsj9hz4n5ShURku2YUV4LkH2TvTzsNgLn8eEwy6jpRGrnY8FJEYqKYAzXP6hfw/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbyjj5odItP5iend4FGdg1ktp714to3UFPqVwZWYuMXGiqZDOCJR8UylJ_0KfLtrLcpqGQ/exec';
+const SENHA_DA_ESCOLA = '12345'; // Você pode mudar essa senha aqui!
 
 document.addEventListener('DOMContentLoaded', () => {
+    // --- LÓGICA DE LOGIN ---
+    const loginOverlay = document.getElementById('loginOverlay');
+    const loginForm = document.getElementById('loginForm');
+    const loginError = document.getElementById('loginError');
+    const loggedUserLabel = document.getElementById('loggedUserLabel');
+
+    const savedUser = localStorage.getItem('sgi_userName');
+    
+    if (savedUser) {
+        if(loginOverlay) loginOverlay.classList.add('hidden');
+        if(loggedUserLabel) loggedUserLabel.textContent = 'Olá, ' + savedUser;
+    }
+
+    if(loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const pass = document.getElementById('loginPassword').value;
+            const name = document.getElementById('loginName').value;
+
+            if (pass === SENHA_DA_ESCOLA) {
+                localStorage.setItem('sgi_userName', name);
+                loginOverlay.classList.add('hidden');
+                if(loggedUserLabel) loggedUserLabel.textContent = 'Olá, ' + name;
+            } else {
+                loginError.classList.remove('hidden');
+            }
+        });
+    }
+    // -----------------------
+
     // Definir data/hora atual por padrão no carregamento
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -31,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const submitBtn = e.target.querySelector('button[type::="submit"]');
         const originalText = submitBtn.innerHTML;
         submitBtn.innerHTML = 'Salvando na Tabela...';
         submitBtn.disabled = true;
@@ -43,7 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
             severity: document.getElementById('severity').value,
             infractionType: document.getElementById('infractionType').value,
             description: document.getElementById('description').value,
-            actionTaken: document.getElementById('actionTaken').value
+            actionTaken: document.getElementById('actionTaken').value,
+            registeredBy: localStorage.getItem('sgi_userName') || 'Desconhecido'
         };
 
         try {
@@ -212,6 +244,12 @@ function renderTable() {
                 <div class="text-sm text-slate-800 font-medium">${item.actionTaken || '-'}</div>
                 ${item.description ? `<div class="text-xs text-slate-500 mt-1 line-clamp-2 max-w-xs" title="${item.description}">${item.description}</div>` : ''}
             </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-slate-500 flex items-center gap-1">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    ${item.registeredBy || '-'}
+                </div>
+            </td>
         `;
         tbody.appendChild(tr);
     });
@@ -224,7 +262,7 @@ function exportCSV() {
         return;
     }
 
-    let csvContent = "Id,Data e Hora,Nome do Aluno,Turma / Ano,Nível de Gravidade,Tipo de Infração,Descrição,Ação Tomada\n";
+    let csvContent = "Id,Data e Hora,Nome do Aluno,Turma / Ano,Nível de Gravidade,Tipo de Infração,Descrição,Ação Tomada,Registrado Por\n";
     data.forEach(item => {
         let formattedDateTime = item.dateTime;
         try { formattedDateTime = new Date(item.dateTime).toLocaleString('pt-BR'); } catch(e) {}
@@ -237,7 +275,8 @@ function exportCSV() {
             `"${item.severity}"`,
             `"${item.infractionType}"`,
             `"${(item.description || '').replace(/"/g, '""')}"`,
-            `"${(item.actionTaken || '').replace(/"/g, '""')}"`
+            `"${(item.actionTaken || '').replace(/"/g, '""')}"`,
+            `"${(item.registeredBy || '').replace(/"/g, '""')}"`
         ];
         csvContent += row.join(",") + "\n";
     });
