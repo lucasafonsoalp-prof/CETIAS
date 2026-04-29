@@ -1,4 +1,4 @@
-const API_URL = 'https://script.google.com/macros/s/AKfycbyGJPoFJkU-13Z2oscZOlmmgokVvvF6wEIin0GE_RJ-m01n3hv1JlbFY7q51jFLwGzRyg/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbw3yStEq274s9kbG67FbkAfagtxJ4NglH9a839K4F_zW2s3vUzaPv2jwsk4NNp3XNb0oA/exec';
 const SENHA_DA_ESCOLA = '12345'; // Você pode mudar essa senha aqui!
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -127,21 +127,71 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 let allInfractions = [];
+let allStudents = [];
 
-// Buscar infrações da Planilha
+// Buscar infrações e alunos da Planilha
 async function loadInfractions() {
     try {
         const res = await fetch(API_URL);
-        allInfractions = await res.json();
+        const data = await res.json();
+        
+        // A API agora retorna um objeto com infractions e students
+        allInfractions = data.infractions || [];
+        allStudents = data.students || [];
         
         // Reverter a ordem (Google Sheets joga o último no final)
         allInfractions.reverse();
 
+        populateFormClasses();
         populateClassFilter();
         renderTable();
     } catch (error) {
         console.error('Erro ao buscar dados do Google Sheets:', error);
     }
+}
+
+// Preenche o formulário (Cascata: Turma -> Alunos)
+function populateFormClasses() {
+    const classSelect = document.getElementById('classYear');
+    const studentSelect = document.getElementById('studentName');
+    
+    // Pegar o valor atual para tentar manter após recarregar
+    const currentClass = classSelect.value;
+    
+    // Obter turmas únicas da lista de ALUNOS
+    const classes = [...new Set(allStudents.map(s => s.classYear.toString().trim()))]
+        .filter(c => c !== '')
+        .sort();
+    
+    classSelect.innerHTML = '<option value="" disabled selected>Selecione a turma...</option>';
+    classes.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        classSelect.appendChild(opt);
+    });
+
+    if (classes.includes(currentClass)) {
+        classSelect.value = currentClass;
+    }
+
+    // Evento quando a turma é selecionada -> popula o select de alunos
+    classSelect.addEventListener('change', (e) => {
+        const selectedClass = e.target.value;
+        const studentsInClass = allStudents
+            .filter(s => s.classYear.toString().trim() === selectedClass)
+            .map(s => s.name.trim())
+            .sort();
+        
+        studentSelect.innerHTML = '<option value="" disabled selected>Selecione o aluno...</option>';
+        studentsInClass.forEach(name => {
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            studentSelect.appendChild(opt);
+        });
+        studentSelect.disabled = false;
+    });
 }
 
 function populateClassFilter() {
