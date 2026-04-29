@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        const submitBtn = e.target.querySelector('button[type::="submit"]');
+        const submitBtn = e.target.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
         submitBtn.innerHTML = 'Salvando na Tabela...';
         submitBtn.disabled = true;
